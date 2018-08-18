@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 
 @Component
@@ -31,15 +30,24 @@ public class DeviceControl {
 
     private Motor motor;
 
-    @PostConstruct
-    private void init() {
-        ubidotsToken = getUbidotsToken();
-
-        try {
-            motor = new Motor(pinEngage, pinDirection);
+    private void initIfNot() {
+        if(ubidotsToken == null) {
+            try {
+                ubidotsToken = getUbidotsToken();
+            }
+            catch (Exception e) {
+                System.out.println("Cant obtain Ubidots token");
+                return;
+            }
         }
-        catch (UnsatisfiedLinkError e) {
-            System.out.println("Cant initialize Raspberry Pi GPIO");
+
+        if(motor == null) {
+            try {
+                motor = new Motor(pinEngage, pinDirection);
+            }
+            catch (UnsatisfiedLinkError e) {
+                System.out.println("Cant initialize Raspberry Pi GPIO");
+            }
         }
     }
 
@@ -73,14 +81,19 @@ public class DeviceControl {
 
     @Scheduled(initialDelay = 10000, fixedRate = 500)
     private void fetchData() {
-        MotorState motorState = getMotorState();
-        System.out.println("Motor engaged: " + motorState.isEngaged() + "; Direction: " + motorState.getDirection());
+        try {
+            initIfNot();
 
-        if(motor == null) {
-            System.out.println("Raspberry Pi pins was not initialized.");
-        }
-        else {
+            MotorState motorState = getMotorState();
+            System.out.println("Motor engaged: " + motorState.isEngaged() + "; Direction: " + motorState.getDirection());
+
             motor.go(motorState);
+        }
+        catch (Exception e) {
+            // If something went wrong - reset Ubidots token and init RPi pins again
+            ubidotsToken = null;
+            motor = null;
+            System.out.println(e.getMessage());
         }
     }
 }
