@@ -1,7 +1,6 @@
 package com.sfirsov.sytac.iot.slab.service;
 
-import com.sfirsov.sytac.iot.slab.device.Motor;
-import com.sfirsov.sytac.iot.slab.model.MotorState;
+import com.sfirsov.sytac.iot.slab.device.LED;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,17 +17,14 @@ public class DeviceControl {
     @Value("${ubidots.api.key}")
     private String ubidotsApiKey;
 
-    @Value("${rpi.pin.motor1.pin1}")
-    private int motor1Pin1;
-
-    @Value("${rpi.pin.motor1.pin2}")
-    private int motor1Pin2;
+    @Value("${rpi.pin.led}")
+    private int ledPin;
 
     private String ubidotsToken;
 
     private RestTemplate restTemplate = new RestTemplate();
 
-    private Motor motor;
+    private LED LED;
 
     private void initIfNot() {
         if(ubidotsToken == null) {
@@ -41,9 +37,9 @@ public class DeviceControl {
             }
         }
 
-        if(motor == null) {
+        if(LED == null) {
             try {
-                motor = new Motor(motor1Pin1, motor1Pin2);
+                LED = new LED(ledPin);
             }
             catch (UnsatisfiedLinkError e) {
                 System.out.println("Cant initialize Raspberry Pi GPIO");
@@ -64,13 +60,15 @@ public class DeviceControl {
         return body.get("token");
     }
 
-    private MotorState getMotorState() {
-        MotorState motorState = new MotorState();
-        String getMotorEngagedUrl = "http://things.ubidots.com/api/v1.6/devices/wheel/wheel-1-engaged/lv?token=" + ubidotsToken;
-        HttpEntity<Integer> motorEngaged = restTemplate.getForEntity(getMotorEngagedUrl, Integer.class);
-        motorState.setEngaged(motorEngaged.getBody() > 0);
+    private String getLedState() {
+        String retval = null;
 
-        return motorState;
+        String getMotorEngagedUrl = "http://things.ubidots.com/api/v1.6/devices/LED/state/lv?token=" + ubidotsToken;
+        HttpEntity<Integer> motorEngaged = restTemplate.getForEntity(getMotorEngagedUrl, Integer.class);
+        System.out.println(motorEngaged.getBody());
+        //motorState.setEngaged(motorEngaged.getBody() > 0);
+        retval = motorEngaged.getBody()>0? "On" : "Off";
+        return retval;
     }
 
     @Scheduled(initialDelay = 10000, fixedRate = 500)
@@ -78,15 +76,15 @@ public class DeviceControl {
         try {
             initIfNot();
 
-            MotorState motorState = getMotorState();
-            System.out.println("Motor 1 engaged: " + motorState.isEngaged());
+            String ledState = getLedState();
+            System.out.println("LED 1 state is: " + ledState);
 
-            motor.go(motorState);
+            LED.go(ledState);
         }
         catch (Exception e) {
             // If something went wrong - reset Ubidots token and init RPi pins again
             ubidotsToken = null;
-            motor = null;
+            LED = null;
             System.out.println(e.getMessage());
         }
     }
