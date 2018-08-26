@@ -6,20 +6,20 @@ import com.sfirsov.sytac.iot.slab.model.MotorState;
 import static com.pi4j.io.gpio.RaspiPin.getPinByAddress;
 
 public class Motor {
-    private GpioPinDigitalOutput engagePin;
-    private GpioPinDigitalOutput directionPin;
+    private GpioPinDigitalOutput pin1;
+    private GpioPinDigitalOutput pin2;
 
-    public Motor(int pinEngageNumber, int pinDirectionNumber) {
+    public Motor(int pin1, int pin2) {
         final GpioController gpio = GpioFactory.getInstance();
 
-        unprovisionPinIfProvisioned(pinEngageNumber);
-        unprovisionPinIfProvisioned(pinDirectionNumber);
+        unprovisionPinIfProvisioned(pin1);
+        unprovisionPinIfProvisioned(pin2);
 
-        engagePin = gpio.provisionDigitalOutputPin(getPinByAddress(pinEngageNumber), "Engage motor", PinState.LOW);
-        engagePin.setMode(PinMode.DIGITAL_OUTPUT);
+        this.pin1 = gpio.provisionDigitalOutputPin(getPinByAddress(pin1), "Motor pin " + pin1, PinState.LOW);
+        this.pin1.setMode(PinMode.DIGITAL_OUTPUT);
 
-        directionPin = gpio.provisionDigitalOutputPin(getPinByAddress(pinDirectionNumber), "Motor direction", PinState.LOW);
-        directionPin.setMode(PinMode.DIGITAL_OUTPUT);
+        this.pin2 = gpio.provisionDigitalOutputPin(getPinByAddress(pin2), "Motor pin " + pin2, PinState.LOW);
+        this.pin2.setMode(PinMode.DIGITAL_OUTPUT);
     }
 
     private static void unprovisionPinIfProvisioned(int pinNumber) {
@@ -31,21 +31,18 @@ public class Motor {
     }
 
     public void go(MotorState motorState) {
-        if(engagePin == null || directionPin == null) {
+        if(pin1 == null || pin2 == null) {
             System.out.println("Raspberry Pi pins was not initialized.");
             return;
         }
 
         if(!motorState.isEngaged()) {
-            engagePin.low();
-        }
-        else if(motorState.getDirection() <= 0) {
-            engagePin.high();
-            directionPin.low();
+            pin1.low();
+            pin2.low();
         }
         else {
-            engagePin.high();
-            directionPin.high();
+            pin1.high();
+            pin2.low();
         }
     }
 }

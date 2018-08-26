@@ -18,11 +18,11 @@ public class DeviceControl {
     @Value("${ubidots.api.key}")
     private String ubidotsApiKey;
 
-    @Value("${rpi.pin.motor.engage}")
-    private int pinEngage;
+    @Value("${rpi.pin.motor1.pin1}")
+    private int motor1Pin1;
 
-    @Value("${rpi.pin.motor.direction}")
-    private int pinDirection;
+    @Value("${rpi.pin.motor1.pin2}")
+    private int motor1Pin2;
 
     private String ubidotsToken;
 
@@ -43,7 +43,7 @@ public class DeviceControl {
 
         if(motor == null) {
             try {
-                motor = new Motor(pinEngage, pinDirection);
+                motor = new Motor(motor1Pin1, motor1Pin2);
             }
             catch (UnsatisfiedLinkError e) {
                 System.out.println("Cant initialize Raspberry Pi GPIO");
@@ -66,15 +66,9 @@ public class DeviceControl {
 
     private MotorState getMotorState() {
         MotorState motorState = new MotorState();
-        String getMotorEngagedUrl = "http://things.ubidots.com/api/v1.6/devices/wheel/wheel-engaged/lv?token=" + ubidotsToken;
+        String getMotorEngagedUrl = "http://things.ubidots.com/api/v1.6/devices/wheel/wheel-1-engaged/lv?token=" + ubidotsToken;
         HttpEntity<Integer> motorEngaged = restTemplate.getForEntity(getMotorEngagedUrl, Integer.class);
         motorState.setEngaged(motorEngaged.getBody() > 0);
-
-        if(motorState.isEngaged()) {
-            String getMotorDirectionUrl = "http://things.ubidots.com/api/v1.6/devices/wheel/wheel-direction/lv?token=" + ubidotsToken;
-            HttpEntity<Integer> motorDirection = restTemplate.getForEntity(getMotorDirectionUrl, Integer.class);
-            motorState.setDirection(motorDirection.getBody());
-        }
 
         return motorState;
     }
@@ -85,7 +79,7 @@ public class DeviceControl {
             initIfNot();
 
             MotorState motorState = getMotorState();
-            System.out.println("Motor engaged: " + motorState.isEngaged() + "; Direction: " + motorState.getDirection());
+            System.out.println("Motor 1 engaged: " + motorState.isEngaged());
 
             motor.go(motorState);
         }

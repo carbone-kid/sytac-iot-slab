@@ -3,7 +3,7 @@
 ## Programming workflow
 1. If you on Windows install Bonjour service from Apple. On Mac skip this step.
 2. If you don't have them installed yet, install JDK 8 and Maven
-3. Install Putty
+3. If you are using Windows Install Putty. On Mac please use any other SSH client.
 4. Flash this image to 8GB micro SD card and insert it into Raspberry Pi Zero W (to make it shorter RPi)
 5. Connect RPi to your computer, open Putty and create a new session
     * Host name: rpi-1.local
@@ -58,3 +58,8 @@ Now if you will be pushing buttons you created on Ubidots you should see the out
 
 ## Tips and tricks
 * To see the GPIO pins status execute `gpio readall` in the RPi console
+* To look up the GPIO pinout of RPi Zero W you can check Pi4G library website http://pi4j.com/pins/model-zerow-rev1.html
+* To scan available WiFi networks execute `sudo iwlist wlan0 scan`
+* To set up WiFi setting via interactive interface `sudo raspi-config`
+* To set WiFi settings via config file edit /etc/wpa_supplicant/wpa_supplicant.conf `sudo nano /etc/wpa_supplicant/wpa_supplicant.conf`
+
