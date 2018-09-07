@@ -43,7 +43,7 @@ public class DeviceControl {
 
         if(motor == null) {
             try {
-                motor = new Motor(motor1Pin1, motor1Pin2);
+                motor = new Motor();
             }
             catch (UnsatisfiedLinkError e) {
                 System.out.println("Cant initialize Raspberry Pi GPIO");
@@ -67,10 +67,12 @@ public class DeviceControl {
 
     private MotorState getMotorState() {
         MotorState motorState = new MotorState();
-        String getMotorEngagedUrl = "http://things.ubidots.com/api/v1.6/devices/wheel/wheel-1-engaged/lv?token=" + ubidotsToken;
-        HttpEntity<Integer> motorEngaged = restTemplate.getForEntity(getMotorEngagedUrl, Integer.class);
-        motorState.setEngaged(motorEngaged.getBody() > 0);
-
+        String getMotorAccelerate = "http://things.ubidots.com/api/v1.6/devices/supercar/accelerate/lv?token=" + ubidotsToken;
+        String getMotorDirect = "http://things.ubidots.com/api/v1.6/devices/supercar/direction/lv?token=" + ubidotsToken;
+        HttpEntity<Integer> motorAccelerate = restTemplate.getForEntity(getMotorAccelerate, Integer.class);
+        HttpEntity<Integer> motorDirection = restTemplate.getForEntity(getMotorDirect, Integer.class);
+        motorState.setEngaged(motorAccelerate.getBody() > 0);
+        motorState.setDirection(motorDirection.getBody());
         return motorState;
     }
 
