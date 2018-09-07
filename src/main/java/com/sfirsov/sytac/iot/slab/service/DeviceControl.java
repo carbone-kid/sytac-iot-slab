@@ -51,6 +51,7 @@ public class DeviceControl {
         }
     }
 
+
     private String getUbidotsToken() {
         String getTockenUrl = "http://things.ubidots.com/api/v1.6/auth/token";
 
