@@ -24,11 +24,18 @@ public class DeviceControl {
     @Value("${rpi.pin.motor1.pin2}")
     private int motor1Pin2;
 
+    @Value("${rpi.pin.motor2.pin1}")
+    private int motor2Pin1;
+
+    @Value("${rpi.pin.motor2.pin2}")
+    private int motor2Pin2;
+
     private String ubidotsToken;
 
     private RestTemplate restTemplate = new RestTemplate();
 
-    private Motor motor;
+    private Motor motor1;
+    private Motor motor2;
 
     private void initIfNot() {
         if(ubidotsToken == null) {
@@ -41,9 +48,10 @@ public class DeviceControl {
             }
         }
 
-        if(motor == null) {
+        if(motor1 == null || motor2 == null) {
             try {
-                motor = new Motor(motor1Pin1, motor1Pin2);
+                motor1 = new Motor(motor1Pin1, motor1Pin2);
+                motor2 = new Motor(motor2Pin1, motor2Pin2);
             }
             catch (UnsatisfiedLinkError e) {
                 System.out.println("Cant initialize Raspberry Pi GPIO");
@@ -64,9 +72,9 @@ public class DeviceControl {
         return body.get("token");
     }
 
-    private MotorState getMotorState() {
+    private MotorState getMotorState(int motorNumber) {
         MotorState motorState = new MotorState();
-        String getMotorEngagedUrl = "http://things.ubidots.com/api/v1.6/devices/wheel/wheel-1-engaged/lv?token=" + ubidotsToken;
+        String getMotorEngagedUrl = "http://things.ubidots.com/api/v1.6/devices/wheel/wheel-" + motorNumber + "-engaged/lv?token=" + ubidotsToken;
         HttpEntity<Integer> motorEngaged = restTemplate.getForEntity(getMotorEngagedUrl, Integer.class);
         motorState.setEngaged(motorEngaged.getBody() > 0);
 
@@ -78,15 +86,19 @@ public class DeviceControl {
         try {
             initIfNot();
 
-            MotorState motorState = getMotorState();
-            System.out.println("Motor 1 engaged: " + motorState.isEngaged());
+            MotorState motor1State = getMotorState(1);
+            MotorState motor2State = getMotorState(2);
+            System.out.println("Motor 1 engaged: " + motor1State.isEngaged());
+            System.out.println("Motor 2 engaged: " + motor2State.isEngaged());
 
-            motor.go(motorState);
+            motor1.go(motor1State);
+            motor2.go(motor2State);
         }
         catch (Exception e) {
             // If something went wrong - reset Ubidots token and init RPi pins again
             ubidotsToken = null;
-            motor = null;
+            motor1 = null;
+            motor2 = null;
             System.out.println(e.getMessage());
         }
     }
