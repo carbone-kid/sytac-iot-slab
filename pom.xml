@@ -82,7 +82,7 @@
                         <configuration>
                             <target>
                                 <scp localFile="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                     remoteToFile="pi@rpi-1.local:/home/pi/sytac-iot-slab-rpi.jar" verbose="true"
+                                     remoteToFile="pi@rpi-1:/home/pi/sytac-iot-slab-rpi.jar" verbose="true"
                                      password="sytac-1" trust="true">
                                 </scp>
                             </target>

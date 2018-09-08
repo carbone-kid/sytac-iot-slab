@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class MotorState {
-    private boolean engaged;
+    private int engaged;
     private int direction;
 }

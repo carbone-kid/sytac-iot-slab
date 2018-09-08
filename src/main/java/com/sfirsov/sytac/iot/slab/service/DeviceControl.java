@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Component
@@ -71,7 +72,7 @@ public class DeviceControl {
         String getMotorDirect = "http://things.ubidots.com/api/v1.6/devices/supercar/direction/lv?token=" + ubidotsToken;
         HttpEntity<Integer> motorAccelerate = restTemplate.getForEntity(getMotorAccelerate, Integer.class);
         HttpEntity<Integer> motorDirection = restTemplate.getForEntity(getMotorDirect, Integer.class);
-        motorState.setEngaged(motorAccelerate.getBody() > 0);
+        motorState.setEngaged(motorAccelerate.getBody());
         motorState.setDirection(motorDirection.getBody());
         return motorState;
     }
@@ -82,7 +83,7 @@ public class DeviceControl {
             initIfNot();
 
             MotorState motorState = getMotorState();
-            System.out.println("Motor 1 engaged: " + motorState.isEngaged());
+            System.out.println( LocalDateTime.now() + "Motor 1 engaged: " + motorState.getEngaged());
 
             motor.go(motorState);
         }

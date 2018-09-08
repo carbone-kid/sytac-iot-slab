@@ -35,17 +35,58 @@ public class Motor {
     }
 
     public void go(MotorState motorState) {
-        if (pin1 == null || pin2 == null) {
-            System.out.println("Raspberry Pi pins was not initialized.");
-            return;
-        }
+//        if (pin1 == null || pin2 == null) {
+//            System.out.println("Raspberry Pi pins was not initialized.");
+//            return;
+//        }
 
-        if (!motorState.isEngaged()) {
-            pin1.low();
-            pin2.low();
+        if (motorState.getEngaged() == 2) {
+            provisionedPins.get(0).low();
+            provisionedPins.get(1).high();
+            provisionedPins.get(2).low();
+            provisionedPins.get(3).high();
+
+            provisionedPins.get(4).low();
+            provisionedPins.get(5).high();
+            provisionedPins.get(7).low();
+            provisionedPins.get(6).high();
+
+
+            if (motorState.getDirection() == 0) {
+                provisionedPins.get(0).low();
+                provisionedPins.get(1).high();
+                provisionedPins.get(2).low();
+                provisionedPins.get(3).low();
+
+            } else if (motorState.getDirection() == 2) {
+                provisionedPins.get(0).low();
+                provisionedPins.get(1).low();
+                provisionedPins.get(2).low();
+                provisionedPins.get(3).high();
+            } else {
+                provisionedPins.get(0).low();
+                provisionedPins.get(1).high();
+                provisionedPins.get(2).low();
+                provisionedPins.get(3).high();
+
+                provisionedPins.get(4).low();
+                provisionedPins.get(5).high();
+                provisionedPins.get(7).low();
+                provisionedPins.get(6).high();
+            }
+
+        } else if (motorState.getEngaged() == 0) {
+            provisionedPins.get(0).high();
+            provisionedPins.get(1).low();
+            provisionedPins.get(2).high();
+            provisionedPins.get(3).low();
+
+            provisionedPins.get(4).high();
+            provisionedPins.get(5).low();
+            provisionedPins.get(7).high();
+            provisionedPins.get(6).low();
         } else {
-            pin1.high();
-            pin2.low();
+            provisionedPins.forEach(GpioPinDigitalOutput::low);
         }
     }
 }
